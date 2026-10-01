@@ -18,7 +18,7 @@ const { Pool } = pg;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const isServerless = Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT); const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: isServerless ? 1 : 10, idleTimeoutMillis: 30000 });
+const isServerless = Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.LAMBDA_TASK_ROOT || process.env.AWS_EXECUTION_ENV || process.cwd() === '/var/task'); const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: isServerless ? 1 : 10, idleTimeoutMillis: 30000 });
 const google = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';

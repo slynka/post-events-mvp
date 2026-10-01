@@ -25,6 +25,12 @@ Create the PostgreSQL schema with `npm run db:migrate` after setting `DATABASE_U
 ## Netlify
 The repository includes `netlify.toml` and `netlify/functions/api.js`. Configure `DATABASE_URL` and a random `JWT_SECRET` of at least 32 characters in Netlify, then run `npm run db:migrate` against that database before publishing. `GOOGLE_CLIENT_ID` and the VAPID key pair are optional. Events can be created without media; image/video uploads deliberately return `MEDIA_STORAGE_NOT_CONFIGURED` on Netlify until persistent object storage is implemented and configured. The local development server stores uploads in `uploads/`.
 
+### Enable Google sign-in
+1. In Google Cloud Console, create an OAuth client ID with application type **Web application**.
+2. Add `https://post-events.netlify.app` under **Authorized JavaScript origins**. For local development, add `http://localhost:3000` and `http://localhost:8888` as needed. Google Identity Services uses an ID token callback here, so no redirect URI is required.
+3. In Netlify, open **Project configuration → Environment variables** and add `GOOGLE_CLIENT_ID` with the client ID ending in `.apps.googleusercontent.com`.
+4. Redeploy the site. The sign-in screen reads the configured client ID from `/api/config`; do not put credentials in `config.js` or commit them to Git.
+
 Netlify Functions do not keep a Socket.IO connection alive, so the frontend refreshes the event feed every 30 seconds on Netlify. The standalone Node server uses Socket.IO for live updates.
 
 The site is an installable PWA for phones. On Android, use the “На телефон” button or the browser menu. On iPhone/iPad, open the site in Safari and choose Share → Add to Home Screen. This installs the web app; publishing to Google Play or the App Store requires separate store accounts and packaging.

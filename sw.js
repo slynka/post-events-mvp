@@ -1,4 +1,4 @@
-const CACHE = 'events-app-v3';
+const CACHE = 'events-app-v4';
 const APP_SHELL = [
   '/', '/index.html', '/style.css', '/script.js', '/notifications.js',
   '/profile-enhancements.js', '/config.js', '/manifest.webmanifest',

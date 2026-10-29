@@ -106,3 +106,6 @@ body{background:var(--app-paper);color:var(--app-ink)}
   .report{margin-bottom:12px}
   .toast{bottom:calc(92px + env(safe-area-inset-bottom))}
 }
+
+body.feed-mode .map-section,body.feed-mode .search-wrap,body.feed-mode #locate{display:none}
+body.feed-mode .feed-section{display:block}

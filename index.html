@@ -70,7 +70,8 @@
       <div id="preview" class="preview hidden"></div>
       <label>Назва або короткий опис<textarea id="desc" required maxlength="180" placeholder="Наприклад: Вуличний джаз на площі Ринок"></textarea></label>
       <label>Категорія<select id="cat"><option value="concert">🎵 Концерт</option><option value="sport">⚽ Спорт</option><option value="street">♧ Вулична подія</option><option value="other">✨ Інше</option></select></label>
-      <div class="location-box"><div class="location-preview" aria-hidden="true"><span>●</span></div><div class="location-copy"><b>⌖ Місце визначено</b><span id="locationText">Визначаємо геолокацію…</span></div><button type="button" id="pickLocation">Змінити</button></div>
+      <div class="location-box"><div class="location-preview" aria-hidden="true"><span>●</span></div><div class="location-copy"><b>⌖ Місце події</b><span id="locationText">Стартова точка карти</span></div><div class="location-actions"><button class="text-btn" type="button" id="useCurrentLocation">Моя локація</button><button class="text-btn" type="button" id="pickLocation">Вибрати на мапі</button></div></div>
+      <p class="privacy-note">Геолокація вмикається лише після натискання «Моя локація». Точку події буде видно всім відвідувачам.</p>
       <input id="latitude" type="hidden"><input id="longitude" type="hidden"><button class="primary" type="submit">➤ Опублікувати</button><p class="form-error" id="createError"></p>
     </form>
   </dialog>

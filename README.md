@@ -23,7 +23,11 @@ Set the required values from `.env.example` before starting the backend. Never c
 Create the PostgreSQL schema with `npm run db:migrate` after setting `DATABASE_URL`. The migration is safe to re-run.
 
 ## Netlify
-The repository includes `netlify.toml` and `netlify/functions/api.js`. Configure `DATABASE_URL` and a random `JWT_SECRET` of at least 32 characters in Netlify, then run `npm run db:migrate` against that database before publishing. `GOOGLE_CLIENT_ID` and the VAPID key pair are optional. Events can be created without media; image/video uploads deliberately return `MEDIA_STORAGE_NOT_CONFIGURED` on Netlify until persistent object storage is implemented and configured. The local development server stores uploads in `uploads/`.
+The repository includes `netlify.toml` and `netlify/functions/api.js`. Configure `DATABASE_URL` and a random `JWT_SECRET` of at least 32 characters in Netlify, then run `npm run db:migrate` against that database before publishing. For Supabase, use the **Transaction pooler** connection string for the Netlify function and keep it only in `DATABASE_URL`; the serverless runtime opens short-lived connections. The existing API also accepts `NETLIFY_DB_URL` or `NETLIFY_DATABASE_URL` when the host provides one. `GOOGLE_CLIENT_ID` and the VAPID key pair are optional.
+
+For persistent uploads on Netlify, create a Supabase Storage bucket named `event-media` and make it public because event media is visible to site visitors. Then configure `SUPABASE_URL`, `SUPABASE_STORAGE_BUCKET`, and the server-only `SUPABASE_SERVICE_ROLE_KEY` in Netlify. Never put the service key in `config.js`, frontend code, or Git. The same storage integration also stores avatars. Local development continues to store files in `uploads/` unless the Supabase variables are set.
+
+When creating an event, the app asks for location only after the user presses “Моя локація”; users can instead choose a point on the map. Published events show their selected map point to visitors, so the location notice appears before publishing. Login sessions use an HttpOnly cookie for seven days and are restored by `/api/me` when the app loads.
 
 ### Enable Google sign-in
 1. In Google Cloud Console, create an OAuth client ID with application type **Web application**.

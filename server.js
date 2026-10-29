@@ -28,6 +28,16 @@ const isServerless = Boolean(process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCT
 function databaseUnavailable(res) {
   return res.status(503).json({ error: dbUrl ? 'DATABASE_UNAVAILABLE' : 'DATABASE_NOT_CONFIGURED' });
 }
+function requestBody(req) {
+  if (req.body && typeof req.body === 'object' && !Buffer.isBuffer(req.body)) return req.body;
+  if (typeof req.body === 'string') {
+    try {
+      const parsed = JSON.parse(req.body);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch {}
+  }
+  return {};
+}
 const google = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
@@ -47,6 +57,8 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) webpush.setVa
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '1mb' }));
+app.use(express.text({ type: 'text/plain', limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
 app.use(cookieParser());
 app.use('/api/', rateLimit({ max: 120, keyPrefix: 'api' }));
 app.use('/api/auth/', rateLimit({ max: 20, keyPrefix: 'auth' }));
@@ -71,14 +83,15 @@ app.get('/api/health', async (_req, res) => {
   }
 });
 app.get('/api/config', (_req, res) => res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || '', vapidPublicKey: process.env.VAPID_PUBLIC_KEY || '', netlify: isServerless, databaseConfigured: Boolean(dbUrl) }));
-app.post('/api/auth/register', async (req, res) => { try { if (!dbUrl) return databaseUnavailable(res); const { email, password, name } = req.body || {}; const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''; const normalizedName = typeof name === 'string' ? name.trim() : ''; if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) return res.status(400).json({ error: 'INVALID_EMAIL' }); if (!normalizedName || normalizedName.length > 80) return res.status(400).json({ error: 'INVALID_NAME' }); if (typeof password !== 'string' || password.length < 8 || password.length > 200) return res.status(400).json({ error: 'INVALID_PASSWORD' }); const hash = await bcrypt.hash(password, 12); const { rows } = await pool.query('INSERT INTO users(email,password_hash,name) VALUES($1,$2,$3) RETURNING id,email,name,avatar_url,role,verified', [normalizedEmail, hash, normalizedName]); setSession(res, rows[0]); res.status(201).json({ user: publicUser(rows[0]) }); } catch (e) { if (e.code === '23505') return res.status(409).json({ error: 'EMAIL_EXISTS' }); return databaseUnavailable(res); } });
-app.post('/api/auth/login', async (req, res) => { try { if (!dbUrl) return databaseUnavailable(res); const { email, password } = req.body; const { rows } = await pool.query('SELECT * FROM users WHERE email=$1', [email?.trim().toLowerCase()]); if (!rows[0] || !rows[0].password_hash || !(await bcrypt.compare(password || '', rows[0].password_hash))) return res.status(401).json({ error: 'INVALID_CREDENTIALS' }); setSession(res, rows[0]); res.json({ user: publicUser(rows[0]) }); } catch { return databaseUnavailable(res); } });
+app.post('/api/auth/register', async (req, res) => { try { if (!dbUrl) return databaseUnavailable(res); const body = requestBody(req); const { email, password, name } = body; if (typeof email !== 'string') { console.warn('Registration request is missing email field', { bodyKeys: Object.keys(body) }); return res.status(400).json({ error: 'EMAIL_FIELD_MISSING' }); } const normalizedEmail = email.normalize('NFKC').trim().toLowerCase(); const normalizedName = typeof name === 'string' ? name.trim() : ''; if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) return res.status(400).json({ error: 'INVALID_EMAIL' }); if (!normalizedName || normalizedName.length > 80) return res.status(400).json({ error: 'INVALID_NAME' }); if (typeof password !== 'string' || password.length < 8 || password.length > 200) return res.status(400).json({ error: 'INVALID_PASSWORD' }); const hash = await bcrypt.hash(password, 12); const { rows } = await pool.query('INSERT INTO users(email,password_hash,name) VALUES($1,$2,$3) RETURNING id,email,name,avatar_url,role,verified', [normalizedEmail, hash, normalizedName]); setSession(res, rows[0]); res.status(201).json({ user: publicUser(rows[0]) }); } catch (e) { if (e.code === '23505') return res.status(409).json({ error: 'EMAIL_EXISTS' }); return databaseUnavailable(res); } });
+app.post('/api/auth/login', async (req, res) => { try { if (!dbUrl) return databaseUnavailable(res); const { email, password } = requestBody(req); const { rows } = await pool.query('SELECT * FROM users WHERE email=$1', [email?.trim().toLowerCase()]); if (!rows[0] || !rows[0].password_hash || !(await bcrypt.compare(password || '', rows[0].password_hash))) return res.status(401).json({ error: 'INVALID_CREDENTIALS' }); setSession(res, rows[0]); res.json({ user: publicUser(rows[0]) }); } catch { return databaseUnavailable(res); } });
 app.post('/api/auth/google', async (req, res) => {
   if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).json({ error: 'GOOGLE_AUTH_NOT_CONFIGURED' });
-  if (typeof req.body?.credential !== 'string' || !req.body.credential) return res.status(400).json({ error: 'GOOGLE_TOKEN_MISSING' });
+  const body = requestBody(req);
+  if (typeof body.credential !== 'string' || !body.credential) return res.status(400).json({ error: 'GOOGLE_TOKEN_MISSING' });
   let payload;
   try {
-    const ticket = await google.verifyIdToken({ idToken: req.body?.credential, audience: process.env.GOOGLE_CLIENT_ID });
+    const ticket = await google.verifyIdToken({ idToken: body.credential, audience: process.env.GOOGLE_CLIENT_ID });
     payload = ticket.getPayload();
   } catch {
     return res.status(401).json({ error: 'INVALID_GOOGLE_TOKEN' });

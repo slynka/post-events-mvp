@@ -47,8 +47,23 @@ if (isProduction && (!JWT_SECRET || JWT_SECRET.length < 32)) throw new Error('JW
 // /tmp, but media is rejected later unless persistent object storage is wired.
 const uploadDir = isServerless ? null : path.join(process.cwd(), 'uploads');
 if (uploadDir) fs.mkdirSync(uploadDir, { recursive: true });
-const uploadStorage = isServerless ? multer.memoryStorage() : multer.diskStorage({ destination: uploadDir }); const upload = multer({ storage: uploadStorage, limits: { fileSize: isServerless ? 5 * 1024 * 1024 : 100 * 1024 * 1024 }, fileFilter: (_req, file, cb) => cb(null, /^image\/(jpeg|png|webp|gif)$|^video\/(mp4|webm|quicktime)$/.test(file.mimetype) ? null : new Error('UNSUPPORTED_MEDIA')) });
-const avatarUpload = multer({ storage: uploadStorage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (_req, file, cb) => cb(null, /^image\/(jpeg|png|webp)$/.test(file.mimetype) ? null : new Error('UNSUPPORTED_AVATAR')) });
+const uploadStorage = isServerless ? multer.memoryStorage() : multer.diskStorage({ destination: uploadDir });
+const upload = multer({
+  storage: uploadStorage,
+  limits: { fileSize: isServerless ? 5 * 1024 * 1024 : 100 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (/^image\/(jpeg|png|webp|gif)$|^video\/(mp4|webm|quicktime)$/.test(file.mimetype)) return cb(null, true);
+    cb(new Error('UNSUPPORTED_MEDIA'));
+  }
+});
+const avatarUpload = multer({
+  storage: uploadStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (/^image\/(jpeg|png|webp)$/.test(file.mimetype)) return cb(null, true);
+    cb(new Error('UNSUPPORTED_AVATAR'));
+  }
+});
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'mailto:admin@example.com', process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
 
 

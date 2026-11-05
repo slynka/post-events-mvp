@@ -114,3 +114,35 @@ body.feed-mode .feed-section{display:block}
 .event-copy .event-title{margin:5px 0 13px;line-height:1.2}
 .event-description{border-top:1px solid #e1e7ee;padding-top:12px}
 .event-description p{margin:6px 0 0;color:#4f5c6d;font-size:14px;line-height:1.65;white-space:pre-wrap}
+
+/* Fresh, colorful map-first visual refresh. */
+:root{--app-blue:#2864f0;--app-yellow:#ffd34d;--app-paper:#f3f6fb;--app-ink:#18243a}
+body{background:#eaf0f8;color:var(--app-ink)}
+.app{width:min(100%,1080px);background:#f7f9fc;box-shadow:0 18px 60px #20324b12}
+header{background:#ffffffed;border-bottom-color:#e9eef5;backdrop-filter:blur(16px)}
+.brand{letter-spacing:-.3px}.brand span,.modal-title>span{background:linear-gradient(145deg,#ffdf73,#ffc93d);box-shadow:0 5px 14px #eebd3a35}
+.hero h1{letter-spacing:-.8px;color:#17243b}.hero p{color:#75839a}
+.search{border-color:#e8edf4;box-shadow:0 8px 24px #233d5d0c}
+.search:focus-within{border-color:#a9c4ff;box-shadow:0 0 0 4px #2864f014,0 8px 24px #233d5d0c}
+.chips button{border-color:#e5eaf1;color:#5b687d;transition:background .16s,border-color .16s,transform .16s}
+.chips button:hover{transform:translateY(-1px)}
+.chips button.on{background:var(--app-blue);border-color:var(--app-blue);box-shadow:0 5px 14px #2864f035}
+#map{border-color:#dfe7f0;box-shadow:0 12px 30px #273d5a12}
+.card{border-color:#e6ebf2;box-shadow:0 5px 18px #21395608}
+.card:hover{box-shadow:0 14px 30px #21395615}
+nav{background:#ffffffed;border-top-color:#e8edf3;backdrop-filter:blur(18px);box-shadow:0 -8px 32px #20324b0d}
+nav button.active{color:var(--app-blue)}
+.nav-plus{box-shadow:0 6px 15px #e4b72f45}
+@media(max-width:680px){
+  body,html{background:#f3f6fb}
+  #map{box-shadow:none}
+  #map .leaflet-tile-pane{filter:saturate(1.14) contrast(1.02) brightness(1.01)}
+  .search{height:54px;border:1px solid #e9eef5;box-shadow:0 8px 26px #172a451c}
+  .chips{padding-top:10px;gap:8px}
+  .chips button{padding:9px 14px;background:#ffffffed;border:1px solid #edf0f4;box-shadow:0 4px 12px #1b2e4614;color:#4c5a70}
+  nav{height:66px;background:#fffffff0;border:1px solid #e7edf4;box-shadow:0 8px 28px #172a4525}
+  nav button.active{color:var(--app-blue)}
+  body.feed-mode .feed-section{background:#f3f6fb}
+  body.feed-mode .feed-section>.section-head h2{letter-spacing:-.6px}
+  .card{box-shadow:0 5px 18px #2039580c}
+}

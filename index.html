@@ -68,7 +68,8 @@
     <form id="createForm">
       <label>Фото або відео<div class="upload-box"><span class="upload-icon">⊗</span><b>Додайте фото або відео</b><small>Завантажте з галереї або зробіть знімок</small><div class="media-actions"><button type="button" id="galleryBtn">▧ Галерея</button><button type="button" id="cameraBtn">◎ Камера</button></div></div><input id="media" class="hidden" type="file" accept="image/*,video/*" capture="environment"></label>
       <div id="preview" class="preview hidden"></div>
-      <label>Назва або короткий опис<textarea id="desc" required maxlength="180" placeholder="Наприклад: Вуличний джаз на площі Ринок"></textarea></label>
+      <label>Тема події<input id="title" required maxlength="140" placeholder="Наприклад: Вуличний джаз на площі Ринок"></label>
+      <label>Опис події<textarea id="desc" required maxlength="1000" placeholder="Розкажи детальніше: що відбувається, о котрій починається та що варто знати"></textarea></label>
       <label>Категорія<select id="cat"><option value="concert">🎵 Концерт</option><option value="sport">⚽ Спорт</option><option value="street">♧ Вулична подія</option><option value="other">✨ Інше</option></select></label>
       <div class="location-box"><div class="location-preview" aria-hidden="true"><span>●</span></div><div class="location-copy"><b>⌖ Місце події</b><span id="locationText">Стартова точка карти</span></div><div class="location-actions"><button class="text-btn" type="button" id="useCurrentLocation">Моя локація</button><button class="text-btn" type="button" id="pickLocation">Вибрати на мапі</button></div></div>
       <p class="privacy-note">Геолокація вмикається лише після натискання «Моя локація». Точку події буде видно всім відвідувачам.</p>

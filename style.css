@@ -109,3 +109,9 @@ body{background:var(--app-paper);color:var(--app-ink)}
 
 body.feed-mode .map-section,body.feed-mode .search-wrap,body.feed-mode #locate{display:none}
 body.feed-mode .feed-section{display:block}
+/* Visually separate event topic from its description. */
+.event-copy{margin:10px 0 14px;padding:16px;background:#f7f9fc;border:1px solid #e5ebf2;border-radius:16px}
+.event-copy>small,.event-description>small{display:block;color:#79879a;font-size:10px;font-weight:800;letter-spacing:1px}
+.event-copy .event-title{margin:5px 0 13px;line-height:1.2}
+.event-description{border-top:1px solid #e1e7ee;padding-top:12px}
+.event-description p{margin:6px 0 0;color:#4f5c6d;font-size:14px;line-height:1.65;white-space:pre-wrap}

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f3f6fb">
+  <meta name="description" content="Знаходь події поруч і ділись тим, що відбувається навколо.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/icons/app-192.png">
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://accounts.google.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+  <title>Події поруч — Events</title>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand"><span>✦</span><b>Події поруч</b></div>
+      <div class="header-actions">
+        <button class="install-btn" id="installApp" type="button">＋ На телефон</button>
+        <button class="icon-btn" id="bell" type="button" aria-label="Сповіщення">♢</button>
+      </div>
+    </header>
+    <main>
+      <section class="hero">
+        <div><small>ПОРУЧ · LIVE</small><h1>Що відбувається поруч?</h1><p>Живі події від людей навколо тебе.</p></div>
+      </section>
+      <section class="search-wrap" aria-label="Пошук подій">
+        <div class="search"><span aria-hidden="true">⌕</span><input id="q" placeholder="Що відбувається поруч?" autocomplete="off" aria-label="Пошук подій"><button id="filterBtn" type="button" aria-label="Фільтри">☷</button></div>
+        <div class="chips" id="chips" aria-label="Категорії">
+          <button class="on" data-c="all" type="button">Усі</button><button data-c="concert" type="button">🎵 Концерти</button><button data-c="sport" type="button">⚽ Спорт</button><button data-c="street" type="button">♧ Вуличні акції</button><button data-c="other" type="button">✨ Інше</button>
+        </div>
+      </section>
+      <section class="map-section" aria-label="Мапа подій">
+        <div class="section-head"><div><small>ІНТЕРАКТИВНА КАРТА</small><h2>Події поблизу</h2></div><span class="live"><i></i> LIVE</span></div>
+        <div id="map"></div>
+        <button id="locate" class="loc-btn" type="button" aria-label="Моя локація">⌖</button>
+      </section>
+      <section class="feed-section">
+        <div class="section-head"><div><small>СТРІЧКА</small><h2>Цікаве навколо</h2></div><button class="text-btn" id="refresh" type="button">Оновити</button></div>
+        <div id="list" class="feed"></div>
+      </section>
+    </main>
+    <button class="create-fab" id="add" type="button"><span>＋</span> Додати подію</button>
+    <nav aria-label="Основна навігація">
+      <button class="active" id="mapnav" type="button">⌖<small>Карта</small></button>
+      <button id="feednav" type="button">☷<small>Стрічка</small></button>
+      <button class="nav-plus" id="addnav" type="button" aria-label="Додати подію">＋</button>
+      <button id="profileNav" type="button">◯<small>Профіль</small></button>
+    </nav>
+  </div>
+
+  <dialog id="auth" aria-labelledby="authTitle">
+    <button class="close x" type="button" aria-label="Закрити">×</button>
+    <div class="modal-title"><span>✦</span><h2 id="authTitle">Увійти</h2><p>Дивись події, публікуй власні та знаходь людей поруч.</p></div>
+    <div class="auth-tabs"><button class="active" data-mode="login" type="button">Вхід</button><button data-mode="register" type="button">Реєстрація</button></div>
+    <form id="authForm"><label id="nameField" class="hidden">Ім'я<input id="authName" autocomplete="name"></label><label>Email<input id="authEmail" type="email" autocomplete="email" required></label><label>Пароль<input id="authPassword" type="password" minlength="8" autocomplete="current-password" required></label><button class="primary" type="submit" id="authSubmit">Увійти</button></form>
+    <div class="or"><span>або</span></div><div id="googleBtn" class="google" aria-label="Продовжити з Google"></div><p class="google-help" id="googleHelp" role="status">Підключаємо Google…</p><p class="form-error" id="authError"></p>
+  </dialog>
+
+  <dialog id="create" aria-labelledby="createTitle">
+    <button class="close x" type="button" aria-label="Закрити">×</button>
+    <div class="modal-title"><span>＋</span><h2 id="createTitle">Нова подія</h2><p>Поділись тим, що відбувається поруч.</p></div>
+    <form id="createForm">
+      <label>Фото або відео<div class="upload-box"><span class="upload-icon">⊗</span><b>Додайте фото або відео</b><small>Завантажте з галереї або зробіть знімок</small><div class="media-actions"><button type="button" id="galleryBtn">▧ Галерея</button><button type="button" id="cameraBtn">◎ Камера</button></div></div><input id="media" class="hidden" type="file" accept="image/*,video/*" capture="environment"></label>
+      <div id="preview" class="preview hidden"></div>
+      <label>Тема події<input id="title" required maxlength="140" placeholder="Наприклад: Вуличний джаз на площі Ринок"></label>
+      <label>Опис події<textarea id="desc" required maxlength="1000" placeholder="Розкажи детальніше: що відбувається, о котрій починається та що варто знати"></textarea></label>
+      <label>Категорія<select id="cat"><option value="concert">🎵 Концерт</option><option value="sport">⚽ Спорт</option><option value="street">♧ Вулична подія</option><option value="other">✨ Інше</option></select></label>
+      <div class="location-box"><div class="location-preview" aria-hidden="true"><span>●</span></div><div class="location-copy"><b>⌖ Місце події</b><span id="locationText">Стартова точка карти</span></div><div class="location-actions"><button class="text-btn" type="button" id="useCurrentLocation">Моя локація</button><button class="text-btn" type="button" id="pickLocation">Вибрати на мапі</button></div></div>
+      <p class="privacy-note">Геолокація вмикається лише після натискання «Моя локація». Точку події буде видно всім відвідувачам.</p>
+      <input id="latitude" type="hidden"><input id="longitude" type="hidden"><button class="primary" type="submit">➤ Опублікувати</button><p class="form-error" id="createError"></p>
+    </form>
+  </dialog>
+  <dialog id="event" aria-label="Подія"><button class="close x" type="button" aria-label="Закрити">×</button><div id="eventContent"></div></dialog>
+  <dialog id="profile" aria-label="Профіль"><button class="close x" type="button" aria-label="Закрити">×</button><div id="profileContent"></div></dialog>
+  <dialog id="notifications" aria-label="Сповіщення"><button class="close x" type="button" aria-label="Закрити">×</button><div class="modal-title"><span>♢</span><h2>Сповіщення</h2><p>Активність навколо тебе.</p></div><button class="primary" id="enablePush" type="button">🔔 Увімкнути push-сповіщення</button><div id="notificationList"></div></dialog>
+  <script src="config.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script src="script.js"></script>
+  <script src="notifications.js"></script>
+  <script src="profile-enhancements.js"></script>
+</body>
+</html>
